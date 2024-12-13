@@ -67,33 +67,32 @@ def precipitation_query():
 
     #create dictionary from data and append to list of precipitation
     yearly_precipitation = []
-    for date, prcp in results:
+    for m in results:
         precipitation_dict = {}
-        precipitation_dict["date"] = date
-        precipitation_dict["precipitation"] = prcp
+        precipitation_dict["date"] = m.date
+        precipitation_dict["precipitation"] = m.prcp
         yearly_precipitation.append(precipitation_dict)
 
     return jsonify(yearly_precipitation)
 
 
-#create route for station query (query isn't working!!!!!!!!!!!!!)
+#create route for station query 
 @app.route("/api/v1.0/stations")
 def stations():
     # Create Session from python to the Database
     session = Session(engine)
 
     #Return list of all stations
-    results = session.query(Station.station, Station.id).all()
+    results = session.query(Station.station).all()
     
     #close session
-    session.close
+    session.close()
 
     #create list of stations
     station_list = []
     for s in results:
         station_dict = {}
-        station_dict['station'] = station
-        station_dict['id'] = id
+        station_dict['station'] = s.station
         station_list.append(station_dict)
 
 
@@ -102,7 +101,7 @@ def stations():
 
 
 
-@app.route("/api/v1.0/tobs") #unsure why this isn't working
+@app.route("/api/v1.0/tobs") 
 def tobs():
     # Create Session from python to the Database
     session = Session(engine)
@@ -112,7 +111,7 @@ def tobs():
     filter((Measurement.date >= '2016-08-23') & (Measurement.station == 'USC00519281')).all()
 
     #close session
-    session.close
+    session.close()
 
     #create list and run for loop
     temp_list = []
