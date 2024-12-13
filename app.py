@@ -45,11 +45,11 @@ def welcome():
     """List all available api routes."""
     return (
         f"Available Routes:<br/>"
-        f"/api/v1.0/precipitation"
-        f"/api/v1.0/stations"
-        f"/api/v1.0/tobs"
-        f"/api/v1.0/<start>"
-        f"/api/v1.0/<start>/<end>"
+        f"/api/v1.0/precipitation<br/>"
+        f"/api/v1.0/stations<br/>"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/2016-07-01<br/>"
+        f"/api/v1.0/2016-07-01/2016-07-02<br/>"
     )
 
 #create route for precipitation query
@@ -126,20 +126,61 @@ def tobs():
 
 
 
-# @app.route("/api/v1.0/<start>")
-# def start():
-#     # Create Session from python to the Database
-#     session = Session(engine)
+@app.route("/api/v1.0/<start>")
+def start(start):
+    # Create Session from python to the Database
+    session = Session(engine)
+
+
+    #return min, average, and max temp for all dates 
+    temp = [func.min(Measurement.tobs),
+        func.max(Measurement.tobs),
+        func.avg(Measurement.tobs)]
+
+    #design query for start dates
+    temperatures = session.query(*temp)\
+    .filter(Measurement.date >= start).all()
+
+    #close session
+    session.close()
+
+    #create dictionary to house calculations
+    temp_dict = {
+    'minimum' : temperatures[0][0],
+    'maximum' : temperatures[0][1],
+    'average' : temperatures[0][2]
+}
+    #jsonify results
+    return jsonify(temp_dict)
 
 
 
+@app.route("/api/v1.0/<start>/<end>")
+def start_end(start, end):
+    # Create Session from python to the Database
+    session = Session(engine)
 
-# @app.route("/api/v1.0/<start>/<end>")
-# def start_end():
-#     # Create Session from python to the Database
-#     session = Session(engine)
+#return min, average, and max temp for all dates 
+    temp_end = [func.min(Measurement.tobs),
+        func.max(Measurement.tobs),
+        func.avg(Measurement.tobs)]
 
+    #design query for start and end dates
+    temperatures = session.query(*temp_end)\
+    .filter((Measurement.date >= start)\
+            & (Measurement.date <= end)).all()
 
+    #close session
+    session.close()
+
+    #create dictionary to house calculations
+    temp_end_dict = {
+    'minimum' : temperatures[0][0],
+    'maximum' : temperatures[0][1],
+    'average' : temperatures[0][2]
+}
+    #jsonify results
+    return jsonify(temp_end_dict)
 
 
 
